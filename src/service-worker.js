@@ -12,6 +12,7 @@ import { ExpirationPlugin } from 'workbox-expiration';
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate } from 'workbox-strategies';
+import { get, set } from 'idb-keyval';
 
 clientsClaim();
 
@@ -88,11 +89,11 @@ self.addEventListener("fetch", (event) => {
         event.waitUntil(cache.add(event.request));
         return cachedResponse;
       }
-      if (event.request.url === 'https://adultmembersites.com/api/encoding') {
+      if (event.request.url.includes(':key')) {
         console.log('url is', event.request.url)
-        const cloned = event.request.clone()
-        // cloned.url = 'https://adultmembersites.com/api/encoding-changed'
-        return fetch('https://adultmembersites.com/api/encoding-changed');
+        const keyValue = await get('video_key');
+        console.log('key val is SW: ' + keyValue);
+        return fetch('https://adultmembersites.com/api/'+keyValue);
       }
       // If we didn't find a match in the cache, use the network.
       return fetch(event.request);
